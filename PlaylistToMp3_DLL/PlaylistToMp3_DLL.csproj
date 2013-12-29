@@ -45,7 +45,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GitHub\taglib-sharp\src\taglib-sharp.csproj">
+    <ProjectReference Include="..\taglib-sharp\src\taglib-sharp.csproj">
       <Project>{6b143a39-c7b2-4743-9917-92262c60e9a6}</Project>
       <Name>taglib-sharp</Name>
     </ProjectReference>

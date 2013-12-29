@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace PlaylistToMp3_DLL
         }
         private TagLib.File _file;
        
-        public string Format { get { return _file.Properties.MediaTypes.ToString(); } }
+        public string Format { get { return (new FileInfo(_file.Name)).Extension; } }
         public int Bitrate
         {
             get
