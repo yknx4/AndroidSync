@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ffmpeg_convert
 {
     public delegate void ProgressChangedEventHandler(object sender, FFmpeg.Convert.ProgressChangedEventArgs e);
+
     /// <summary>
     ///  FFmpeg class
     /// </summary>
@@ -20,8 +16,9 @@ namespace ffmpeg_convert
         /// </summary>
         public enum Architectures
         {
-            x86,x64
+            x86, x64
         }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="FFmpeg"/> class.
         /// </summary>
@@ -35,14 +32,14 @@ namespace ffmpeg_convert
                 case Architectures.x64:
                     Properties.ffmpeg.Default.arch = "x64";
                     break;
+
                 case Architectures.x86:
                     Properties.ffmpeg.Default.arch = "x86";
                     break;
-                    
             }
             Start();
-            
         }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="FFmpeg"/> class.
         /// </summary>
@@ -67,16 +64,18 @@ namespace ffmpeg_convert
         /// Starts this instance.
         /// </summary>
         /// <exception cref="System.ArgumentException">ffmpeg cannot be found in the specified path: +finalPath.FullName;path</exception>
-        void Start(){
+        private void Start()
+        {
             string full_path = Properties.ffmpeg.Default.bin_location + Properties.ffmpeg.Default.arch + "/ffmpeg.exe";
             FileInfo finalPath = new FileInfo(full_path);
             if (!finalPath.Exists)
             {
-                throw new ArgumentException("ffmpeg cannot be found in the specified path: "+finalPath.FullName, "path");
+                throw new ArgumentException("ffmpeg cannot be found in the specified path: " + finalPath.FullName, "path");
             }
             Converter = new Convert();
             Convert.Path = finalPath.FullName;
         }
+
         /// <summary>
         /// Argumets used at an Mp3Conversion
         /// </summary>
@@ -85,19 +84,22 @@ namespace ffmpeg_convert
             /// <summary>
             /// Initializes a new instance of the <see cref="Mp3ConversionArgs"/> class.
             /// </summary>
-           public Mp3ConversionArgs()
+            public Mp3ConversionArgs()
             {
                 isVariable = true;
                 _preset = 2;
             }
-           /// <summary>
-           /// Gets or sets a value indicating whether output bitrate [is variable].
-           /// </summary>
-           /// <value>
-           ///   <c>true</c> if [is variable]; otherwise, <c>false</c>.
-           /// </value>
+
+            /// <summary>
+            /// Gets or sets a value indicating whether output bitrate [is variable].
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if [is variable]; otherwise, <c>false</c>.
+            /// </value>
             public bool isVariable { get; set; }
+
             private int _preset;
+
             /// <summary>
             /// Gets or sets the preset bitrate.
             /// </summary>
@@ -141,12 +143,12 @@ namespace ffmpeg_convert
                     }
                 }
             }
-
         }
+
         /// <summary>
         /// Class to perform conversions
         /// </summary>
-        /// 
+        ///
         public class Convert
         {
             /// <summary>
@@ -156,10 +158,12 @@ namespace ffmpeg_convert
             /// The path.
             /// </value>
             public static string Path { get; set; }
+
             /// <summary>
             /// Occurs when [progress changed].
             /// </summary>
             public event ProgressChangedEventHandler ProgressChanged;
+
             /// <summary>
             /// Event args for [progress changed]
             /// </summary>
@@ -167,6 +171,7 @@ namespace ffmpeg_convert
             {
                 public Double Progress { get; set; }
             }
+
             /// <summary>
             /// Raises the <see cref="E:ProgressChanged" /> event.
             /// </summary>
@@ -178,6 +183,7 @@ namespace ffmpeg_convert
             }
 
             private TagLib.File currentItem;
+
             /// <summary>
             /// To the MP3.
             /// </summary>
@@ -198,13 +204,13 @@ namespace ffmpeg_convert
                 startInfo.RedirectStandardOutput = true;
                 startInfo.RedirectStandardInput = true;
                 startInfo.RedirectStandardError = true;
-                startInfo.FileName=Path;
+                startInfo.FileName = Path;
                 startInfo.Arguments = "";
-                startInfo.Arguments += "-i \""+input.FullName+"\"";
+                startInfo.Arguments += "-i \"" + input.FullName + "\"";
                 startInfo.Arguments += " -codec:a libmp3lame";
                 if (args.isVariable)
                 {
-                    startInfo.Arguments += " -q:a "+args.Preset;
+                    startInfo.Arguments += " -q:a " + args.Preset;
                 }
                 else
                 {
@@ -214,16 +220,16 @@ namespace ffmpeg_convert
                 startInfo.Arguments += " -vsync 2 -y -loglevel fatal -stats";
                 mProcess.StartInfo = startInfo;
                 //Console.WriteLine(Environment.NewLine + "Args: " + startInfo.Arguments + Environment.NewLine);
-                if (mProcess.Start()) {
+                if (mProcess.Start())
+                {
                     mProcess.BeginOutputReadLine();
                     mProcess.BeginErrorReadLine();
                     mProcess.WaitForExit();
                     return true;
-                
                 }
                 return false;
-                
             }
+
             /// <summary>
             /// Handles the progress output.
             /// </summary>
@@ -233,6 +239,7 @@ namespace ffmpeg_convert
             {
                 ParseProgressLine(e.Data);
             }
+
             /// <summary>
             /// Parses the progress line in FFmpeg output.
             /// </summary>
@@ -245,22 +252,18 @@ namespace ffmpeg_convert
                 //Console.WriteLine("DEB: " + original);
                 if (original.Contains("time="))
                 {
-                    
-                    string timespan = original.Substring(original.IndexOf("time=")+5, 11);
-                    TimeSpan mPosicion; 
-                    TimeSpan.TryParse(timespan,out mPosicion);
+                    string timespan = original.Substring(original.IndexOf("time=") + 5, 11);
+                    TimeSpan mPosicion;
+                    TimeSpan.TryParse(timespan, out mPosicion);
                     mPosicion = mPosicion.ZeroMilliseconds();
                     double progress = mPosicion.ZeroMilliseconds().TotalSeconds / currentItem.Properties.Duration.ZeroMilliseconds().TotalSeconds;
                     OnProgressChanged(new ProgressChangedEventArgs { Progress = progress });
-                    
-                    
+
                     //Console.WriteLine(mPosicion.ToString() + " / "+currentItem.Properties.Duration.ZeroMilliseconds().ToString()+"    "+(progress*100).ToString()+"%");
                 }
             }
-            public string LastError { get; set; }
 
-            
+            public string LastError { get; set; }
         }
     }
-   
 }
