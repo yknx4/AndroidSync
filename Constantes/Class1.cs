@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlaylistToMp3_DLL
+namespace Constantes
 {
     public class Class1
     {
+    }
+    public struct Mp3Presets
+    {
+        
     }
 }

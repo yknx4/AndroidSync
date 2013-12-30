@@ -1,23 +1,98 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TagLib;
 
 namespace PlaylistToMp3_DLL
 {
+    public delegate void ConvertedEventHandler(object sender, EventArgs e);
     public class MusicFile
     {
+        private TagLib.File _file;
+
+        public event ConvertedEventHandler Converted;
+        private bool _isConverted;
+
+        protected virtual void OnConverted(EventArgs e)
+        {
+            if (Converted != null)
+            {
+                Converted(this, e);
+            }
+        }
+
         public MusicFile(TagLib.File file)
         {
             _file = file;
-            
         }
-        private TagLib.File _file;
-       
+        [Browsable(false)]
+        public FileInfo FileInformation
+        {
+            get
+            {
+                return new FileInfo(FileName);
+            }
+        }
+        [Browsable(false)]
+        public string FileName { get { return _file.Name; } }
+        [DisplayName("File Name")]
+        public string ShortFileName { get { return FileInformation.Name; } }
         public string Format { get { return (new FileInfo(_file.Name)).Extension; } }
+        public string Artist
+        {
+            get
+            {
+                try
+                {
+                    return _file.Tag.Performers.First() != null ? _file.Tag.Performers.First().ToString() : "";
+                }
+                catch (Exception)
+                {
+                    return "No AArtist";
+                }
+            }
+        }
+        public string Album
+        {
+            get
+            {
+                try
+                {
+                    return validateString(_file.Tag.Album.ToString());
+                }
+                catch (Exception)
+                {
+                    return "No Album";
+                }
+
+            }
+        }
+        private string validateString(string input)
+        {
+            if (input != null)
+            {
+                return input;
+            }
+            return string.Empty;
+        }
+        public string Title
+        {
+            get
+            {
+                try { return validateString(_file.Tag.Title.ToString()); }
+                catch (Exception) { return ShortFileName; }
+
+            }
+        }
+        public TimeSpan Duration
+        {
+            get
+            {
+                if (_file.Properties.MediaTypes != TagLib.MediaTypes.None)
+                    return _file.Properties.Duration;
+                return new TimeSpan();
+            }
+        }
         public int Bitrate
         {
             get
@@ -33,39 +108,31 @@ namespace PlaylistToMp3_DLL
                     }
                 }
                 return 0;
+            }
+        }
 
-            }
+        public int Progress
+        {
+            get;
+            set;
         }
-        public string FileName { get { return _file.Name; } }
-        public TimeSpan Duration
+        [DisplayName("Converted")]
+        public bool isConverted
         {
             get
             {
-                if (_file.Properties.MediaTypes != TagLib.MediaTypes.None)
-                    return _file.Properties.Duration;
-                return new TimeSpan();
+                return _isConverted;
             }
-        }
-        public string Artist
-        {
-            get
+            set
             {
-                return _file.Tag.Performers.First()!=null?_file.Tag.Performers.First().ToString():"";
+                OnConverted(EventArgs.Empty);
+                _isConverted = value;
             }
         }
-        public string Album
+        public void resetEvents()
         {
-            get
-            {
-                return _file.Tag.Album.ToString();
-            }
+            Converted = null;
         }
-        public string Title
-        {
-            get
-            {
-                return _file.Tag.Title.ToString();
-            }
-        }
+
     }
 }

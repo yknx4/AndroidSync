@@ -7,6 +7,7 @@ using System.IO;
 using TagLib;
 
 
+
 namespace PlaylistToMp3_DLL
 {
     /// <summary>
@@ -46,7 +47,13 @@ public static class PlaylistLoader
             {
                 foreach (string entry in System.IO.File.ReadAllLines(path))
                 {
-                    FileInfo m_Entry = new FileInfo(Path.GetFullPath(entry));
+                    string entry_f = entry;
+                    if (entry[1] != ':')
+                    {
+                        entry_f = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic) , entry_f);
+                        
+                    }
+                    FileInfo m_Entry = new FileInfo(Path.GetFullPath(entry_f));
                     TagLib.File file = null;
                     if (m_Entry.Exists)
                     {
@@ -64,6 +71,10 @@ public static class PlaylistLoader
                         }
                         result.Add(file);
                     }
+                    else
+                    {
+                        throw new ArgumentException(m_Entry.FullName);
+                    }
 
 
                 }
@@ -72,6 +83,7 @@ public static class PlaylistLoader
             catch (SystemException ex)
             {
                 _error = ex.ToString();
+                //throw ex;
             }
 
             return result;

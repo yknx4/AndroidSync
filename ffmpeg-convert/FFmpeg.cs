@@ -193,7 +193,13 @@ namespace ffmpeg_convert
             /// <returns>True if conversion was succesfull, False otherwise writing error to LastError property</returns>
             public bool ToMp3(FileInfo input, FileInfo output, Mp3ConversionArgs args)
             {
+                
                 currentItem = TagLib.File.Create(input.FullName);
+                if (currentItem.Properties.AudioBitrate < 192)
+                {
+                    input.CopyTo(output.FullName, true);
+                    return true;
+                }
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 Process mProcess = new Process();
                 mProcess.EnableRaisingEvents = true;
@@ -222,9 +228,11 @@ namespace ffmpeg_convert
                 //Console.WriteLine(Environment.NewLine + "Args: " + startInfo.Arguments + Environment.NewLine);
                 if (mProcess.Start())
                 {
+                    LastError = "Args:" + startInfo.Arguments + Environment.NewLine;
                     mProcess.BeginOutputReadLine();
                     mProcess.BeginErrorReadLine();
                     mProcess.WaitForExit();
+                    
                     return true;
                 }
                 return false;
@@ -237,6 +245,7 @@ namespace ffmpeg_convert
             /// <param name="e">The <see cref="DataReceivedEventArgs"/> instance containing the event data.</param>
             private void handleProgressOutput(object sender, DataReceivedEventArgs e)
             {
+                LastError += e.Data + Environment.NewLine;
                 ParseProgressLine(e.Data);
             }
 
