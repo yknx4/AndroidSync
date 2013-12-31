@@ -4,21 +4,17 @@ using PlaylistToMp3_DLL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Program_Settings = PlaylistToMp3__WF_.Properties.Settings;
 
 namespace PlaylistToMp3__WF_
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        public Form1()
+        public MainWindow()
         {
             this.SetStyle(
   ControlStyles.AllPaintingInWmPaint |
@@ -27,26 +23,30 @@ namespace PlaylistToMp3__WF_
             ThreadPool.SetMinThreads(200, 200);
             InitializeComponent();
         }
+
 #if (DEBUG)
-        StreamWriter logfile;
+        private StreamWriter logfile;
 #endif
+
         private void log(params string[] args)
         {
             foreach (string log in args)
             {
+                string full_log = DateTime.Now.ToShortTimeString() + ": " + log + Environment.NewLine;
 #if (DEBUG)
-                logfile.Write(log+Environment.NewLine);
+                logfile.Write(full_log);
                 logfile.AutoFlush = true;
 #endif
-                //txtLog.Text += DateTime.Now.ToShortTimeString() + ": " + log;
-                //txtLog.Text += Environment.NewLine;
+
+                txtLog.AppendText(full_log);
             }
         }
 
-        int numberOfThreads = Environment.ProcessorCount * 2;
-        BindingList<MusicFile> playlist;
-        int thread_no = Environment.ProcessorCount;
-        Queue<Tuple<BackgroundWorker, convertArgs>> Conversions = new Queue<Tuple<BackgroundWorker, convertArgs>>();
+        private int numberOfThreads = Environment.ProcessorCount * 2;
+        private BindingList<MusicFile> playlist;
+        private int thread_no = Environment.ProcessorCount;
+        private Queue<Tuple<BackgroundWorker, convertArgs>> Conversions = new Queue<Tuple<BackgroundWorker, convertArgs>>();
+
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //OpenFileDialog m_open = new OpenFileDialog();
@@ -55,19 +55,23 @@ namespace PlaylistToMp3__WF_
             m_open.ShowDialog();
             if (m_open.FileName != string.Empty)
             {
-
-                log(m_open.FileName + " playlist selected.");
-                playlist = new BindingList<MusicFile>(PlaylistToMp3_DLL.PlaylistLoader.GetPlaylist(m_open.FileName));
-                log(m_open.FileName + " playlist loaded.");
-                BindingListView<MusicFile> view = new BindingListView<MusicFile>(playlist);
-                dtgrPlaylist.DataSource = view;
-                
-                tslblStatus.Text = playlist.Count + " song loaded.";
-                log(playlist.Count + " song loaded.");
+                LoadPlaylist(m_open.FileName);
             }
-
-
         }
+
+        private void LoadPlaylist(string inputFileName)
+        {
+            log(inputFileName + " playlist selected.");
+            playlist = new BindingList<MusicFile>(PlaylistToMp3_DLL.PlaylistLoader.GetPlaylist(inputFileName));
+            log(inputFileName + " playlist loaded.");
+            BindingListView<MusicFile> view = new BindingListView<MusicFile>(playlist);
+            dtgrPlaylist.DataSource = view;
+
+            tslblStatus.Text = playlist.Count + " song loaded.";
+            log(playlist.Count + " song loaded.");
+            PlaylistPath = new FileInfo(inputFileName);
+        }
+
         public FileInfo OutputPath
         {
             get
@@ -78,11 +82,11 @@ namespace PlaylistToMp3__WF_
                 }
                 catch (Exception)
                 {
-
                 }
                 return new FileInfo("output/");
             }
         }
+
         private void btnDeleteSelected_Click(object sender, EventArgs e)
         {
             if (dtgrPlaylist.SelectedRows.Count == 1)
@@ -140,7 +144,7 @@ namespace PlaylistToMp3__WF_
                 source.Progress = 0;
                 source.isConverted = false;
                 source.Converted += source_Converted;
-                log("Preparing " + source.FileName + ".");
+                //log("Preparing " + source.FileName + ".");
 #if (DEBUG)
                 string outputFileName = Extensions.CombineWithValidate(source.Artist, source.Album, source.FileInformation.Name.Replace(source.FileInformation.Extension, "") + ".mp3");
 #else
@@ -156,8 +160,10 @@ namespace PlaylistToMp3__WF_
                     outputFileName = Path.Combine(OutputPath.FullName, outputFileName);
                 }
                 FileInfo output = new FileInfo(outputFileName);
-                log("Output: " + output.FullName);
+                //log("Output: " + output.FullName);
+
                 #region IMPLEMENT_MESSAGEBOX
+
                 if (output.Exists)
                 {
                     log(output.Name + " already exists.", "Skipping");
@@ -171,7 +177,8 @@ namespace PlaylistToMp3__WF_
                 //    cnt++;
                 //}
                 output.Directory.Create();
-                #endregion
+
+                #endregion IMPLEMENT_MESSAGEBOX
 
                 convertArgs conversionArgs = new convertArgs
                 {
@@ -189,7 +196,7 @@ namespace PlaylistToMp3__WF_
                         log(conversionArgs.Output.Name + "conversion failed.", "Exception: " + EventArgs.Error.ToString());
                     }
                     conversionArgs.Input.isConverted = (bool)EventArgs.Result;
-                    log(conversionArgs.Output.Name + " conversion succesfull.");
+                    log(conversionArgs.Input.ShortFileName + " => " + conversionArgs.Output.FullName + " conversion completed.");
                 };
                 mConvert.ProgressChanged += (sender, EventArgs) =>
                 {
@@ -197,7 +204,7 @@ namespace PlaylistToMp3__WF_
                 };
                 mConvert.DoWork += convertingProcess;
                 Conversions.Add(new Tuple<BackgroundWorker, convertArgs>(mConvert, conversionArgs));
-                log("Conversion " + conversionArgs.Input.ShortFileName + " => " + conversionArgs.Output.FullName + " queued.");
+                //log("Conversion " + conversionArgs.Input.ShortFileName + " => " + conversionArgs.Output.FullName + " queued.");
             }
 
             foreach (var task in Conversions)
@@ -210,18 +217,15 @@ namespace PlaylistToMp3__WF_
                 var task = Conversions[threads];
                 this.Conversions.Enqueue(task);
                 if (threads < thread_no) startNewConversion();
-
             }
-
-
-
         }
 
         private void runNewConversion(object sender, RunWorkerCompletedEventArgs e)
         {
             startNewConversion();
         }
-        void startNewConversion()
+
+        private void startNewConversion()
         {
             if (Conversions.Count != 0)
             {
@@ -229,11 +233,9 @@ namespace PlaylistToMp3__WF_
                 task.Item1.RunWorkerAsync(task.Item2);
                 log("Conversion of " + task.Item2.Input.ShortFileName + " started.");
             }
-
-
         }
 
-        void source_Converted(object sender, EventArgs e)
+        private void source_Converted(object sender, EventArgs e)
         {
             //MessageBox.Show("Converted File!");
 
@@ -258,16 +260,6 @@ namespace PlaylistToMp3__WF_
             //txtLog.Text+=(mFFmepg.Converter.LastError);
         }
 
-
-
-        private struct convertArgs
-        {
-            public MusicFile Input { get; set; }
-            public ffmpeg_convert.FFmpeg.Mp3ConversionArgs Arguments { get; set; }
-
-            public FileInfo Output { get; set; }
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             string fPath = txtOuput.Text;
@@ -276,13 +268,17 @@ namespace PlaylistToMp3__WF_
             if (txtOuput.Text != fPath)
             {
                 log("Path changed to: " + txtOuput.Text);
+                Program_Settings.Default.OutputPath = txtOuput.Text;
+                SaveSettings();
             }
-
         }
 
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (PlaylistPath != null && PlaylistPath.Exists)
+            {
+                LoadPlaylist(PlaylistPath.FullName);
+            }
         }
 
         private void rdbCBR_CheckedChanged(object sender, EventArgs e)
@@ -296,15 +292,20 @@ namespace PlaylistToMp3__WF_
                         log("CBR option selected.");
                         cmbPresets.DataSource = Extensions.CBR;
                         cmbPresets.SelectedItem = Extensions.CBR.Last();
+                        Program_Settings.Default.isVariable = false;
                         break;
+
                     case "VBR":
                         log("VBR option selected.");
                         cmbPresets.DataSource = Extensions.VBR;
                         cmbPresets.SelectedIndex = 2;
+                        Program_Settings.Default.isVariable = true;
                         break;
+
                     default:
                         break;
                 }
+                SaveSettings();
             }
         }
 
@@ -316,14 +317,79 @@ namespace PlaylistToMp3__WF_
             logfile = File.AppendText(log_path);
 #endif
             log("pConverter main window Loaded.");
-            cmbPresets.DataSource = Extensions.VBR;
-            cmbPresets.SelectedIndex = 2;
-            txtOuput.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            int per_preset = Program_Settings.Default.Preset;
+            int per_minbitrate = Program_Settings.Default.MinBitrate;
+            if (Program_Settings.Default.isVariable)
+            {
+                cmbPresets.DataSource = Extensions.VBR;
+            }
+            else
+            {
+                cmbPresets.DataSource = Extensions.CBR;
+            }
+
+            cmbPresets.SelectedIndex = per_preset;
+            string outPath = Program_Settings.Default.OutputPath;
+            if (outPath != string.Empty && new FileInfo(outPath).Directory.Exists)
+            {
+                txtOuput.Text = outPath;
+            }
+            else
+            {
+                txtOuput.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                Program_Settings.Default.OutputPath = txtOuput.Text;
+                SaveSettings();
+            }
+
             folderDialog_output.SelectedPath = txtOuput.Text;
             cmbMinBR.DataSource = Extensions.CBR.ToArray();
-            log("Default preferences loaded.");
+            cmbMinBR.SelectedIndex = per_minbitrate;
+            log("Preferences loaded.");
         }
 
+        private void outputPresetChanged(object sender, EventArgs e)
+        {
+            ComboBox source = sender as ComboBox;
+            if (Program_Settings.Default.Preset != source.SelectedIndex)
+            {
+                Program_Settings.Default.Preset = source.SelectedIndex;
+                SaveSettings();
+            }
+            log("Output preset set to: " + source.SelectedValue);
+        }
 
+        private void minBitrateChanged(object sender, EventArgs e)
+        {
+            ComboBox source = sender as ComboBox;
+            if (Program_Settings.Default.MinBitrate != source.SelectedIndex)
+            {
+                Program_Settings.Default.MinBitrate = source.SelectedIndex;
+                SaveSettings();
+            }
+            log("Conversion minimum bitrate set to: " + source.SelectedValue);
+        }
+
+        private void SaveSettings()
+        {
+            Program_Settings.Default.Save();
+        }
+
+        private void whenClosing(object sender, FormClosingEventArgs e)
+        {
+            Program_Settings.Default.Save();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+        }
     }
 }

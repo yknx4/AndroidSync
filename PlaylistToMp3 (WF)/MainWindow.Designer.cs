@@ -1,6 +1,6 @@
 ﻿namespace PlaylistToMp3__WF_
 {
-    partial class Form1
+    partial class MainWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,22 +47,22 @@
             this.btnConvert = new System.Windows.Forms.Button();
             this.dtgrPlaylist = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.btnDirectory = new System.Windows.Forms.Button();
             this.txtOuput = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cmbMinBR = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cmbPresets = new System.Windows.Forms.ComboBox();
             this.rdbVBR = new System.Windows.Forms.RadioButton();
             this.rdbCBR = new System.Windows.Forms.RadioButton();
             this.tmr = new System.Windows.Forms.Timer(this.components);
             this.folderDialog_output = new System.Windows.Forms.FolderBrowserDialog();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.defaultTooltip = new System.Windows.Forms.ToolTip(this.components);
-            this.cmbMinBR = new System.Windows.Forms.ComboBox();
             this.m_open = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -70,10 +70,10 @@
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dtgrPlaylist)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -102,39 +102,44 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(127, 24);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
+            this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(127, 24);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
+            this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(127, 24);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.saveAsToolStripMenuItem.Text = "Save as";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // resetToolStripMenuItem
             // 
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(127, 24);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.resetToolStripMenuItem.Text = "Reset";
             this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(124, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(172, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(127, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -237,6 +242,19 @@
             this.tabPage2.Text = "Preferences";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.txtLog);
+            this.groupBox4.Location = new System.Drawing.Point(6, 289);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(959, 173);
+            this.groupBox4.TabIndex = 2;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Log";
+            // 
             // txtLog
             // 
             this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -304,6 +322,26 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "FFMpeg";
             // 
+            // cmbMinBR
+            // 
+            this.cmbMinBR.FormattingEnabled = true;
+            this.cmbMinBR.Location = new System.Drawing.Point(124, 19);
+            this.cmbMinBR.Name = "cmbMinBR";
+            this.cmbMinBR.Size = new System.Drawing.Size(121, 24);
+            this.cmbMinBR.TabIndex = 2;
+            this.cmbMinBR.SelectedIndexChanged += new System.EventHandler(this.minBitrateChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 22);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(112, 17);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Minimum Bitrate:";
+            this.defaultTooltip.SetToolTip(this.label2, "\"If input file is MP3 and bitrate is lower than this, it\'ll be copied instead of " +
+        "converted\"");
+            // 
             // groupBox2
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -324,6 +362,7 @@
             this.cmbPresets.Name = "cmbPresets";
             this.cmbPresets.Size = new System.Drawing.Size(121, 24);
             this.cmbPresets.TabIndex = 2;
+            this.cmbPresets.SelectedIndexChanged += new System.EventHandler(this.outputPresetChanged);
             // 
             // rdbVBR
             // 
@@ -359,38 +398,6 @@
             // 
             this.folderDialog_output.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // groupBox4
-            // 
-            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox4.Controls.Add(this.txtLog);
-            this.groupBox4.Location = new System.Drawing.Point(6, 289);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(959, 173);
-            this.groupBox4.TabIndex = 2;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Log";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 22);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(112, 17);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Minimum Bitrate:";
-            this.defaultTooltip.SetToolTip(this.label2, "\"If input file is MP3 and bitrate is lower than this, it\'ll be copied instead of " +
-        "converted\"");
-            // 
-            // cmbMinBR
-            // 
-            this.cmbMinBR.FormattingEnabled = true;
-            this.cmbMinBR.Location = new System.Drawing.Point(124, 19);
-            this.cmbMinBR.Name = "cmbMinBR";
-            this.cmbMinBR.Size = new System.Drawing.Size(121, 24);
-            this.cmbMinBR.TabIndex = 2;
-            // 
             // m_open
             // 
             this.m_open.DefaultExt = "m3u8";
@@ -398,7 +405,7 @@
             this.m_open.Filter = "Unicode Playlist|*.m3u8|Playlist|*.m3u";
             this.m_open.Title = "Open Playlist";
             // 
-            // Form1
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -408,8 +415,9 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainWindow";
             this.Text = "Playlist to Mp3 Converter";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.whenClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -419,14 +427,14 @@
             this.tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dtgrPlaylist)).EndInit();
             this.tabPage2.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
