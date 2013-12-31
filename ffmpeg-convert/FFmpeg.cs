@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace ffmpeg_convert
 {
@@ -14,32 +15,21 @@ namespace ffmpeg_convert
         /// <summary>
         /// FFmpeg supported architectures
         /// </summary>
-        public enum Architectures
-        {
-            x86, x64
-        }
+        
 
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="FFmpeg"/> class.
         /// </summary>
         /// <param name="binary">The ffmpeg binary root path.</param>
         /// <param name="arch">The architecture of the system (Will load from a folder with the same name at binary troot path).</param>
-        public FFmpeg(FileInfo binary, Architectures arch)
+        public FFmpeg(FileInfo binary)
         {
             Properties.ffmpeg.Default.bin_location = binary.FullName;
-            switch (arch)
-            {
-                case Architectures.x64:
-                    Properties.ffmpeg.Default.arch = "x64";
-                    break;
-
-                case Architectures.x86:
-                    Properties.ffmpeg.Default.arch = "x86";
-                    break;
-            }
+           
             Start();
         }
-
+        private string arch;
         /// <summary>
         /// Initializes a new instance of the <see cref="FFmpeg"/> class.
         /// </summary>
@@ -66,7 +56,17 @@ namespace ffmpeg_convert
         /// <exception cref="System.ArgumentException">ffmpeg cannot be found in the specified path: +finalPath.FullName;path</exception>
         private void Start()
         {
-            string full_path = Properties.ffmpeg.Default.bin_location + Properties.ffmpeg.Default.arch + "/ffmpeg.exe";
+            if (Environment.Is64BitOperatingSystem)
+            {
+                arch = "x64";
+            }
+            else
+            {
+                arch = "x86";
+            }
+            FileInfo current_dir = new FileInfo(System.Uri.UnescapeDataString(new System.Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath));
+            
+            string full_path = Path.Combine(current_dir.DirectoryName,"external",arch,"ffmpeg.exe") ;
             FileInfo finalPath = new FileInfo(full_path);
             if (!finalPath.Exists)
             {
@@ -88,6 +88,7 @@ namespace ffmpeg_convert
             {
                 isVariable = true;
                 _preset = 2;
+                MinBitrate = 0;
             }
 
             /// <summary>
@@ -99,6 +100,8 @@ namespace ffmpeg_convert
             public bool isVariable { get; set; }
 
             private int _preset;
+
+            public int MinBitrate { get; set; }
 
             /// <summary>
             /// Gets or sets the preset bitrate.
@@ -195,7 +198,7 @@ namespace ffmpeg_convert
             {
                 
                 currentItem = TagLib.File.Create(input.FullName);
-                if (currentItem.Properties.AudioBitrate < 192)
+                if (input.Extension.ToLower() == ".mp3" && (args.MinBitrate > 0 && currentItem.Properties.AudioBitrate < args.MinBitrate))
                 {
                     input.CopyTo(output.FullName, true);
                     return true;
